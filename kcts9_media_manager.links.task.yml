@@ -1,0 +1,19 @@
+kcts9_media_manager.node.update_form:
+  route_name: kcts9_media_manager.node.update_form
+  base_route: entity.node.canonical
+  title: 'Media Manager'
+
+kcts9_media_manager.settings:
+  route_name: kcts9_media_manager.settings
+  base_route: kcts9_media_manager.settings
+  title: 'Settings'
+
+kcts9_media_manager.shows_queue_form:
+  route_name: kcts9_media_manager.shows_queue_form
+  base_route: kcts9_media_manager.settings
+  title: 'Shows Queue'
+
+kcts9_media_manager.video_content_queue_form:
+  route_name: kcts9_media_manager.video_content_queue_form
+  base_route: kcts9_media_manager.settings
+  title: 'Video Content Queue'

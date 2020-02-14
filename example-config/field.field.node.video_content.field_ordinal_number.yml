@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_ordinal_number
+    - node.type.video_content
+id: node.video_content.field_ordinal_number
+field_name: field_ordinal_number
+entity_type: node
+bundle: video_content
+label: Ordinal
+description: 'Episode number within a season.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

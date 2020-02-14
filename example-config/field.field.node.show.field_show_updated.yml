@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_show_updated
+    - node.type.show
+  module:
+    - datetime
+id: node.show.field_show_updated
+field_name: field_show_updated
+entity_type: node
+bundle: show
+label: Updated
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

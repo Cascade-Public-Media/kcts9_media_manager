@@ -1,0 +1,12 @@
+name: KCTS 9 Media Manager
+type: module
+description: PBS Media Manager API sync operations container.
+core: 8.x
+package: KCTS 9
+
+dependencies:
+  - 'drupal:node'
+  - 'drupal:field'
+  - 'scheduler'
+
+configure: kcts9_media_manager.settings

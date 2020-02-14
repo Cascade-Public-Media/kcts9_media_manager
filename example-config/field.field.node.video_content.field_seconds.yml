@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_seconds
+    - node.type.video_content
+id: node.video_content.field_seconds
+field_name: field_seconds
+entity_type: node
+bundle: video_content
+label: Seconds
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

@@ -1,0 +1,17 @@
+kcts9_media_manager.settings:
+  route_name: kcts9_media_manager.settings
+  title: KCTS 9 Media Manager
+  description: Configure settings for the KCTS 9 Media Manager module.
+  parent: system.admin_config_system
+
+kcts9_media_manager.shows_queue_form:
+  route_name: kcts9_media_manager.shows_queue_form
+  title: Shows Queue
+  description: Information about and operations on the Shows queue.
+  parent: kcts9_media_manager.settings
+
+kcts9_media_manager.video_content_queue_form:
+  route_name: kcts9_media_manager.video_content_queue_form
+  title: Video Content Queue
+  description: Information about and operations on the Video Content queue.
+  parent: kcts9_media_manager.settings

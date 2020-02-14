@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_latest_episode
+    - node.type.show
+    - node.type.video_content
+id: node.show.field_latest_episode
+field_name: field_latest_episode
+entity_type: node
+bundle: show
+label: 'Latest Episode'
+description: 'The most recent episode by premiere date; is automatically set by the media manager.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      video_content: video_content
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

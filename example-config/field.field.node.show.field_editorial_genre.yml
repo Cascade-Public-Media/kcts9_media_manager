@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_editorial_genre
+    - node.type.show
+    - taxonomy.vocabulary.editorial_genre
+id: node.show.field_editorial_genre
+field_name: field_editorial_genre
+entity_type: node
+bundle: show
+label: 'Editorial Genre'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      editorial_genre: editorial_genre
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

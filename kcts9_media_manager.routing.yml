@@ -1,0 +1,39 @@
+kcts9_media_manager.settings:
+  path: '/admin/config/system/kcts9-media-manager'
+  defaults:
+    _form: '\Drupal\kcts9_media_manager\Form\Kcts9MediaManagerSettingsForm'
+    _title: 'KCTS 9 Media Manager'
+  requirements:
+    _permission: 'administer site configuration'
+
+kcts9_media_manager.shows_queue_form:
+  path: '/admin/config/system/kcts9-media-manager/shows-queue'
+  defaults:
+    _form: '\Drupal\kcts9_media_manager\Form\ShowsQueueForm'
+    _title: 'Shows Queue'
+  requirements:
+    _permission: 'sync kcts 9 media manager content'
+
+kcts9_media_manager.video_content_queue_form:
+  path: '/admin/config/system/kcts9-media-manager/video-content-queue'
+  defaults:
+    _form: '\Drupal\kcts9_media_manager\Form\VideoContentQueueForm'
+    _title: 'Video Content Queue'
+  requirements:
+    _permission: 'sync kcts 9 media manager content'
+
+kcts9_media_manager.node.update_form:
+  path: '/node/{node}/kcts9-media-manager'
+  defaults:
+    _form: '\Drupal\kcts9_media_manager\Form\NodeUpdateForm'
+    _title_callback: '\Drupal\kcts9_media_manager\Form\NodeUpdateForm::getTitle'
+  requirements:
+    _custom_access: '\Drupal\kcts9_media_manager\Form\NodeUpdateForm::checkAccess'
+    _permission: 'sync kcts 9 media manager content'
+    node: \d+
+  options:
+    _admin_route: TRUE
+    _node_operation_route: TRUE
+    parameters:
+      node:
+        type: 'entity:node'

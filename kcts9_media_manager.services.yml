@@ -1,0 +1,33 @@
+services:
+  kcts9_media_manager.api_client:
+    class: Drupal\kcts9_media_manager\ApiClient
+    arguments:
+      - '@config.factory'
+      - '@state'
+  kcts9_media_manager.show_manager:
+    class: Drupal\kcts9_media_manager\ShowManager
+    arguments:
+      - '@kcts9_media_manager.api_client'
+      - '@entity_type.manager'
+      - '@logger.channel.kcts9_media_manager'
+      - '@queue'
+      - '@state'
+  kcts9_media_manager.video_content_manager:
+    class: Drupal\kcts9_media_manager\VideoContentManager
+    arguments:
+      - '@kcts9_media_manager.api_client'
+      - '@entity_type.manager'
+      - '@logger.channel.kcts9_media_manager'
+      - '@queue'
+      - '@state'
+  logger.channel.kcts9_media_manager:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments:
+      - 'kcts9_media_manager'
+  kcts9_media_manager.scheduler_event_subscriber:
+    class: Drupal\kcts9_media_manager\EventSubscriber\SchedulerEventSubscriber
+    arguments:
+      - '@kcts9_media_manager.show_manager'
+    tags:
+      - { name: event_subscriber }

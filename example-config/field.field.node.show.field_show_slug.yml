@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_show_slug
+    - node.type.show
+id: node.show.field_show_slug
+field_name: field_show_slug
+entity_type: node
+bundle: show
+label: Slug
+description: "This must be a <strong>unique</strong> value among all Show content.<br/>\r\nThe value should only include letters, numbers, and/or the dash character (\"-\")."
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,38 @@
+{#
+/**
+ * @file
+ * Default theme implementation for the Video Content "Partner Player".
+ *
+ * Available variables:
+ * - attributes: Attributes for the container.
+ * - gated: Boolean indicator if the content is "gated" for the current user.
+ * - node: The Video Content node this video comes from.
+ * - src: Source URI to use for the iframe.
+ *
+ * @ingroup themeable
+ * @ingroup kcts9_tv_schedule
+ */
+#}
+
+{{ attach_library('kcts9_media_manager/partner_player') }}
+
+{% if src %}
+  <div{{ attributes.addClass('kcts9-media-manager-partner-player') }}>
+    <div class="partner-player-inner">
+      {% if gated %}
+        <p>{{ 'You do not have access to this content.'|trans }}</p>
+      {% else %}
+        <iframe
+          marginwidth="0"
+          marginheight="0"
+          scrolling="no"
+          src="{{ src.toString() }}"
+          allowfullscreen=""
+          width="100%"
+          height="100%"
+          frameborder="0">
+        </iframe>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

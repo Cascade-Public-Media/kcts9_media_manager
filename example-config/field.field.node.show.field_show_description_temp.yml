@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_show_description_temp
+    - node.type.show
+  module:
+    - text
+id: node.show.field_show_description_temp
+field_name: field_show_description_temp
+entity_type: node
+bundle: show
+label: 'Temporary Long Description'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: true
+  required_summary: false
+field_type: text_with_summary

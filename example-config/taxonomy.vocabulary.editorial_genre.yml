@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Editorial Genre'
+vid: editorial_genre
+description: ''
+weight: 0

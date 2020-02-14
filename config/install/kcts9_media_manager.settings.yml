@@ -1,0 +1,12 @@
+api:
+  key: ''
+  secret: ''
+  base_uri: 'staging'
+shows:
+  queue:
+    autoupdate: false
+    autoupdate_interval: 21600
+video_content:
+  queue:
+    autoupdate: false
+    autoupdate_interval: 43200

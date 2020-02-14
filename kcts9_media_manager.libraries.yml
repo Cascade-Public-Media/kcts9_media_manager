@@ -1,0 +1,13 @@
+partner_player:
+  version: VERSION
+  css:
+    theme:
+      css/partner_player.css: {}
+
+node.show_edit_form:
+  version: VERSION
+  js:
+    js/node.show_edit_form.js: {}
+    dependencies:
+      - core/drupal
+      - core/jquery.once

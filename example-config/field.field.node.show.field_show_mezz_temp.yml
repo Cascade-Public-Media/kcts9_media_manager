@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_show_mezz_temp
+    - media.type.image
+    - node.type.show
+id: node.show.field_show_mezz_temp
+field_name: field_show_mezz_temp
+entity_type: node
+bundle: show
+label: 'Temporary Mezzanine'
+description: 'Photo should be 1920w x 800h pixels'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      image: image
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: file
+field_type: entity_reference

@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_show_tms_id
+    - node.type.show
+id: node.show.field_show_tms_id
+field_name: field_show_tms_id
+entity_type: node
+bundle: show
+label: 'TV Schedule ID'
+description: 'This ID is used by the TV Schedules Service (TVSS) to related Schedule Items to Shows.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

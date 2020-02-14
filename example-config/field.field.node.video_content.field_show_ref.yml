@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_show_ref
+    - node.type.show
+    - node.type.video_content
+id: node.video_content.field_show_ref
+field_name: field_show_ref
+entity_type: node
+bundle: video_content
+label: Show
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      show: show
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

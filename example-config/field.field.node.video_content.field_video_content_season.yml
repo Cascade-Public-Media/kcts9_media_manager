@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_video_content_season
+    - node.type.video_content
+id: node.video_content.field_video_content_season
+field_name: field_video_content_season
+entity_type: node
+bundle: video_content
+label: Season
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

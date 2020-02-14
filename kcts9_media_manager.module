@@ -1,0 +1,273 @@
+<?php
+
+/**
+ * @file
+ * Hooks for the KCTS 9 Media Manager module.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\kcts9_media_manager\Controller\ShowAboutController;
+use Drupal\kcts9_media_manager\Controller\ShowEpisodesController;
+use Drupal\kcts9_media_manager\Controller\ShowExtrasController;
+use Drupal\kcts9_media_manager\Controller\ShowSpecialsController;
+use Drupal\kcts9_media_manager\Controller\VideoPlayerController;
+use Drupal\kcts9_media_manager\Plugin\Field\ShowIsPublishableItemList;
+use Drupal\kcts9_media_manager\Plugin\Field\VideoAvailableItemList;
+use Drupal\kcts9_media_manager\Plugin\Field\VideoIsPassportOnlyItemList;
+use Drupal\kcts9_media_manager\ShowManager;
+use Drupal\kcts9_media_manager\VideoContentManager;
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_theme().
+ */
+function kcts9_media_manager_theme() {
+  return [
+    'kcts9_media_manager_partner_player' => [
+      'variables' => [
+        'gated' => FALSE,
+        'attributes' => [],
+        'node' => NULL,
+        'src' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * @see \Drupal\kcts9_media_manager\Plugin\QueueWorker\ShowsQueueWorker
+ *
+ * @throws \Exception
+ */
+function kcts9_media_manager_cron(): void {
+  /** @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory */
+  $config_factory = \Drupal::service('config.factory');
+  $config = $config_factory->get('kcts9_media_manager.settings');
+
+  $request_time = Drupal::time()->getRequestTime();
+  $now = new DateTime("@{$request_time}");
+
+  // The Video Content queue update process takes precedence over the Shows
+  // queue update and both processes can be time consuming. If the Video Content
+  // queue update runs, the Show queue update will be skipped.
+  $skip_show_autoupdate = FALSE;
+
+  if ($config->get(VideoContentManager::getAutoUpdateConfigName())) {
+    /** @var \Drupal\kcts9_media_manager\VideoContentManager $videoContentManager */
+    $videoContentManager = Drupal::service('kcts9_media_manager.video_content_manager');
+
+    $interval = (int) $config->get(ShowManager::getAutoUpdateIntervalConfigName());
+    $diff = $now->getTimestamp() - $videoContentManager->getLastUpdateTime()->getTimestamp();
+
+    if ($diff > $interval) {
+      _kcts9_media_manager_video_content_update_queue();
+      $skip_show_autoupdate = TRUE;
+    }
+  }
+
+  if ($config->get(ShowManager::getAutoUpdateConfigName())
+    && !$skip_show_autoupdate) {
+    /** @var \Drupal\kcts9_media_manager\ShowManager $showManager */
+    $showManager = Drupal::service('kcts9_media_manager.show_manager');
+
+    $interval = (int) $config->get(ShowManager::getAutoUpdateIntervalConfigName());
+    $diff = $now->getTimestamp() - $showManager->getLastUpdateTime()->getTimestamp();
+
+    if ($diff > $interval) {
+      _kcts9_media_manager_shows_update_queue();
+    }
+  }
+}
+
+/**
+ * Executes the Shows queue update operation.
+ *
+ * @throws \Exception
+ */
+function _kcts9_media_manager_shows_update_queue() {
+  /** @var \Drupal\kcts9_media_manager\ShowManager $showManager */
+  $showManager = Drupal::service('kcts9_media_manager.show_manager');
+  $showManager->updateQueue();
+}
+
+/**
+ * Executes the Video Content queue update operation.
+ *
+ * @throws \Exception
+ */
+function _kcts9_media_manager_video_content_update_queue() {
+  /** @var \Drupal\kcts9_media_manager\VideoContentManager $videoContentManager */
+  $videoContentManager = Drupal::service('kcts9_media_manager.video_content_manager');
+  $videoContentManager->updateQueue();
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function kcts9_media_manager_entity_bundle_field_info(
+  EntityTypeInterface $entity_type,
+  $bundle,
+  array $base_field_definitions
+): array {
+  $fields = [];
+  if ($entity_type->id() == VideoContentManager::getEntityTypeId()) {
+    switch ($bundle) {
+      case VideoContentManager::getBundleId():
+
+        // Indicates if the Video Content node has a video asset that available
+        // at the current time (date/time the field is calculated).
+        $fields['available'] = BaseFieldDefinition::create('boolean')
+          ->setName('available')
+          ->setLabel(t('Video Available'))
+          ->setComputed(TRUE)
+          ->setClass(VideoAvailableItemList::class)
+          ->setDisplayConfigurable('view', TRUE)
+          ->setDisplayOptions('view', [
+            'label' => 'hidden',
+            'weight' => -5,
+          ]);
+
+        // Indicates if the Video Content node has a video asset that is only
+        // available to Passport users at this time.
+        $fields['passport_only'] = BaseFieldDefinition::create('boolean')
+          ->setName('passport_only')
+          ->setLabel(t('Passport Only'))
+          ->setComputed(TRUE)
+          ->setClass(VideoIsPassportOnlyItemList::class)
+          ->setDisplayConfigurable('view', TRUE)
+          ->setDisplayOptions('view', [
+            'label' => 'hidden',
+            'weight' => -5,
+          ]);
+
+        break;
+
+      case ShowManager::getBundleId():
+
+        // Indicates if it is possible for the Show to be published.
+        $fields['publishable'] = BaseFieldDefinition::create('boolean')
+          ->setName('publishable')
+          ->setLabel(t('Publishable'))
+          ->setComputed(TRUE)
+          ->setClass(ShowIsPublishableItemList::class)
+          ->setDisplayConfigurable('view', TRUE)
+          ->setDisplayOptions('view', [
+            'label' => 'hidden',
+            'weight' => -5,
+          ]);
+
+        break;
+    }
+  }
+
+  return $fields;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function kcts9_media_manager_form_node_show_edit_form_alter(
+  &$form,
+  FormStateInterface $form_state,
+  $form_id
+) {
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+
+  // Add current editorial genre field setting to form storage.
+  $editorial_genre = $node->get('field_editorial_genre')->getValue();
+  array_walk($editorial_genre, function (&$value) {
+    return $value = $value['target_id'];
+  });
+  $form_state->set('editorial_genre_initial', $editorial_genre);
+
+  // Add submit handler to evaluate changed to the editorial genre field.
+  foreach (array_keys($form['actions']) as $action) {
+    if ($action != 'preview' && isset($form['actions'][$action]['#type'])
+      && $form['actions'][$action]['#type'] === 'submit') {
+      $form['actions'][$action]['#submit'][] = '_kcts9_media_manager_node_show_submit';
+    }
+  }
+
+  // Add warning for user when changing editorial genre field. Display of this
+  // warning is controlled by Javascript in the "node.show_edit_form" library.
+  $form['#attached']['library'][] = 'kcts9_media_manager/node.show_edit_form';
+  $form['field_editorial_genre']['genre_change_warning'] = [
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#value' => t('<strong>Warning:</strong> Changing the Editorial Genre field
+      will trigger matching changes on <strong>all Video Content</strong> nodes
+      related to this Show. This operation will happen after saving the changes
+      in this form. You must wait for this operation to complete and it can take
+      a long time (10+ minutes) for Shows with many Video Content nodes.'),
+    '#attributes' => [
+      'class' => ['messages', 'messages--warning'],
+      'style' => 'display: none',
+    ],
+  ];
+}
+
+/**
+ * Submit handler for Show node form to process editorial genre changes.
+ *
+ * This function will find any changes made to the Editorial Genre field on a
+ * Show node and make those same changes to all Video Content nodes with the
+ * Show in the "Show ref" field.
+ *
+ * Adds and removals are handling individually in order to reflect actual
+ * changes as opposed to completely overwriting the editorial genres on Video
+ * Content nodes. This allows for individual Video Content to have unique
+ * editorial genres in additional to those provided by the related Show.
+ *
+ * @param array $form
+ *   Node edit form for the Show node.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form state.
+ *
+ * @see kcts9_media_manager_form_node_show_edit_form_alter()
+ * @see kcts9_media_manager_batch_genre_updater_run()
+ * @see kcts9_media_manager_batch_genre_updater_run_finished()
+ */
+function _kcts9_media_manager_node_show_submit(
+  array &$form,
+  FormStateInterface $form_state
+) {
+  $editorial_genre_old = $form_state->get('editorial_genre_initial');
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+
+  // Get new editorial genre field data from updated node.
+  $editorial_genre_new = $node->get('field_editorial_genre')->getValue();
+  array_walk($editorial_genre_new, function (&$value) {
+    return $value = $value['target_id'];
+  });
+
+  // Determine specific genres that were added or removed from the node.
+  $add = array_diff($editorial_genre_new, $editorial_genre_old);
+  $remove = array_diff($editorial_genre_old, $editorial_genre_new);
+
+  // For any adds or removes, execute a batch operation on all related Video
+  // Content nodes to make the same changes.
+  if (!empty($add) || !empty($remove)) {
+    $extension_list = Drupal::service('extension.list.module');
+    $batch = [
+      'title' => t('Updating editorial genre of Video Content related to
+        @show...', [
+          '@show' => $node->label(),
+        ]),
+      'operations' => [['kcts9_media_manager_batch_genre_updater_run', [
+        $node,
+        $add,
+        $remove
+      ]]],
+      'finished' => 'kcts9_media_manager_batch_genre_updater_run_finished',
+      'file' => $extension_list->getPath('kcts9_media_manager')
+        . '/includes/batch.video_content.genre_updater.inc',
+    ];
+    batch_set($batch);
+  }
+}
